@@ -1,0 +1,38 @@
+import os
+from flask import Flask, jsonify, request
+import base64
+
+app = Flask(__name__)
+
+if not os.path.exists('images'):
+    os.mkdir('images')
+else:
+    confirm = input('Remove all files in images folder? (y/n): ')
+    if confirm == 'y':
+        for file in os.listdir('images'):
+            os.remove(f'images/{file}')
+
+@app.route('/')
+def index():
+    return jsonify({'message': 'OK'})
+
+@app.route('/api/image', methods=['POST'])
+def image():
+    try:
+        data = request.get_json()
+        slider = data['slider']
+        base64Image = data['image']
+        imageExtension = data['extension']
+        print(slider)
+
+        with open(f'images/{slider}.{imageExtension}', 'wb') as f:
+            f.write(base64.b64decode(base64Image))
+
+        return jsonify({'message': 'OK'})
+    
+    except Exception as e:
+        print(e)
+        return jsonify({'message': 'Error'})
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=10001)
